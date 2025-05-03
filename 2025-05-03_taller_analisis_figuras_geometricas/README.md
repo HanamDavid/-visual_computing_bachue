@@ -1,62 +1,51 @@
-# Taller Imagen Matriz Pixeles
+# Taller Analisis de Figuras Geometricas
 
-En este taller se trabajó con procesamiento de imágenes utilizando OpenCV en Google Colab. Se comenzó cargando una imagen en color y visualizando sus canales RGB y HSV por separado. Luego, se modificaron regiones específicas de la imagen mediante slicing, cambiando colores y sustituyendo áreas. Se calculó y graficó el histograma de intensidades en escala de grises y por canal de color para analizar la distribución tonal. Finalmente, se aplicaron ajustes manuales de brillo y contraste usando una ecuación lineal, visualizando los efectos de manera comparativa.
+En este taller se trabajó con procesamiento de imágenes usando OpenCV en Google Colab. Se comenzó cargando una imagen y binarizándola para facilitar la detección de contornos. Luego, se utilizaron funciones como cv2.findContours() para identificar las figuras presentes, y se calcularon propiedades geométricas clave como área, perímetro y centroide para cada contorno. Finalmente, se dibujaron los contornos individualmente y en conjunto sobre la imagen original, y se etiquetaron con sus métricas, enfocándonos específicamente en mostrar detalladamente las figuras número 4, 8 y 9, debido a que las demas eran irrelevantes en la construccion de la imagen original.
 
 ### 📸 Capturas o GIFs
-![Untitled ‑ Made with FlexClip](https://github.com/user-attachments/assets/8a398939-84f6-4f7a-a82d-56a6d061a59e)
+![Untitled ‑ Made with FlexClip](https://github.com/user-attachments/assets/14332098-61b8-489e-b21c-af82f6355e0c)
+
 
 ### 🎯 Codigo Relevante
 
-    # Separar canales RGB
-    R, G, B = cv2.split(imagen_rgb)
+    # Detectar contornos
+    contours, hierarchy = cv2.findContours(binary_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    # Convertir a HSV y separar canales
-    imagen_hsv = cv2.cvtColor(imagen_bgr, cv2.COLOR_BGR2HSV)
-    H, S, V = cv2.split(imagen_hsv)
+    # Dibujar los contornos sobre una copia de la imagen original (en color)
+    img_color = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)  # convertir a BGR para dibujar en color
+    cv2.drawContours(img_color, contours, -1, (0, 255, 0), 2)  # contornos verdes
 
-    # --- Cambiar el color de un área rectangular ---
-    # Coordenadas del rectángulo: fila_inicio:fila_fin, columna_inicio:columna_fin
-    modificada[500:600, 100:200] = [255, 0, 0]  # Rojo (en RGB)
+    # Recorremos cada contorno
+    for i, contour in enumerate(contours):
+        # Área
+        area = cv2.contourArea(contour)
+
+        # Perímetro
+        perimeter = cv2.arcLength(contour, True)
     
-    # --- Sustituir una región por otra parte de la imagen ---
-    # Seleccionar una región origen
-    region_origen = imagen_rgb[1405:1615, 200:600]
+        # Momentos para calcular el centroide
+        M = cv2.moments(contour)
     
-    # Pegar la región en otra ubicación (asegúrate de que encaje en tamaño)
-    modificada[50:260, 250:650] = region_origen
+        # Centroide (cx, cy) con manejo de división por cero
+        if M['m00'] != 0:
+            cx = int(M['m10'] / M['m00'])
+            cy = int(M['m01'] / M['m00'])
+        else:
+            cx, cy = 0, 0
 
-    # --- Histograma en escala de grises usando cv2.calcHist ---
-    hist_gris = cv2.calcHist([imagen_gris], [0], None, [256], [0, 256])
-    
-    # --- Histogramas de R, G, B ---
-    colors = ('r', 'g', 'b')
-    for i, color in enumerate(colors):
-        hist = cv2.calcHist([imagen_rgb], [i], None, [256], [0, 256])
-
-    # Ajuste manual de brillo y contraste
-    def ajustar_brillo_contraste(img, alpha, beta):
-        # Convertimos a float32 para evitar saturación en el cálculo
-        img_float = img.astype(np.float32)
-
-    # Aplicar la fórmula
-    img_ajustada = alpha * img_float + beta
-
-    # Recortar valores fuera del rango [0, 255] y convertir de nuevo a uint8
-    img_ajustada = np.clip(img_ajustada, 0, 255).astype(np.uint8)
-    
-    return img_ajustada
-
-    # Parámetros
-    alpha = 1.5  # contraste (1.0 = sin cambio)
-    beta = 1   # brillo (0 = sin cambio)
-    
-    # Aplicar ajuste
-    imagen_ajustada = ajustar_brillo_contraste(imagen_rgb, alpha, beta)
-
+    # Dibujar centroides sobre la imagen con contornos
+    for contour in contours:
+        M = cv2.moments(contour)
+        if M['m00'] != 0:
+            cx = int(M['m10'] / M['m00'])
+            cy = int(M['m01'] / M['m00'])
+            cv2.circle(img_color, (cx, cy), 4, (0, 0, 255), -1)  # punto rojo
+            
 ### ✅ Descripción general de los prompts usados (si aplican).
-link chat: [https://chatgpt.com/share/68144eaf-7fd4-800a-b772-7b3f6b034457](https://chatgpt.com/share/6815045f-c454-800a-bd8a-e36501e72350)
-Se realizó los prompts para ayuda en la carga de la imagen, identificar canales RGB y HSV, sustitucion y cambio de color de regiones especificas, calcular historigramas y aplicar formulas para el ajuste manual de brillo y contraste
+link chat: [[https://chatgpt.com/share/68144eaf-7fd4-800a-b772-7b3f6b034457](https://chatgpt.com/share/6815045f-c454-800a-bd8a-e36501e72350)](https://chatgpt.com/share/68152cec-6df4-800a-afda-f017e5f0fef0)
+Se realizó los prompts para ayuda en la carga de la imagen, binarizar la imagen, identificar contornos, dibujarlos encima de la imagen original individualmente y calcular las areas, perimetros y centroides de esas figuras
 
 ### Comentarios personales sobre el aprendizaje y dificultades encontradas.
 
-Hubo una dificultad encontrada al momento de realizar el ajuste manual del brillo y contraste de la imagen, se realizaron muchas pruebas y errores para variar los parametros alpha(contraste) y beta(brillo)
+Hubo una dificultad al momento de ajustar el humbral al binarizar la imagen. Se realizaron bastantes cambios del valor del humnbral para que posteriormente se detectaran la menos cantidad posibles de contornos que no eran de la figura o no eran importantes
+
