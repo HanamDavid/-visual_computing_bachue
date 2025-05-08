@@ -4,7 +4,7 @@
 - Juan David Guarnizo
 - Nicolás Felipe Arciniegas Lizarazo
 - Lizeth Mariana Garcia
-- Diego Andres Alvarez Gomez
+- Diego Andres Alvarez Gonzalez
 
 🛠️ Facultad de Ingeniería
 🏫 Universidad Nacional de Colombia
