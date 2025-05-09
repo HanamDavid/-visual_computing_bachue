@@ -1,0 +1,98 @@
+:root {
+  font-family: 'VT323', monospace;
+  line-height: 1.2;
+  color-scheme: light dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body { /* O el elemento al que quieras aplicar el fondo */
+  background-color: #373131; /* Un color de fondo base para que se noten los cuadrados transparentes */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 15px,
+    black 15px,
+    black 16px
+  ), repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 15px,
+    black 15px,
+    black 16px
+  );
+  background-size: 42px 42px; /* El tamaño del patrón (borde + espacio) */
+}
+
+
+.buttons{
+    display: flex;
+    flex-direction: column;
+
+}
+button {
+
+    border: 1px solid #aea4a5;
+    box-shadow: 10px 10px 10px black;
+    margin: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: normal;
+    animation: 1s all ease-in-out;
+}
+button:hover {
+    border-color: white;
+    padding: 8px 12px;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.app-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.model_data{
+    background-color: #aea4a5; /* Marrón tierra */
+    width: 60%; /* Tamaño fijo */
+    height: 20%; /* Tamaño fijo */
+    margin: 20px auto; /* Centrar el cuadrado */
+}
+
+.vertical-nav {
+  border: 3px solid #aea4a5;
+  width: 250px; /* Ancho fijo del menú */
+  background-color: #100d0d ;
+  padding: 30px; /* Padding vertical */
+  flex-shrink: 0;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.3); /* Sombra sutil */
+  position: fixed; /* Fija el nav a la izquierda */
+  height: 80vh; /* Ocupa toda la altura */
+  overflow-y: auto; /* Permite scroll si hay muchos elementos */
+  z-index: 100; /* Asegura que esté por encima de otros elementos */
+}
+/* Estilos para el área principal de contenido */
+.main-content {
+  flex-grow: 1; /* Permite que el contenido ocupe el espacio restante */
+  margin-left: 330px; /* Deja espacio a la izquierda igual al ancho del nav */
+}
+
+.main-content canvas {
+    display: block; /* Evita espacio extra bajo el canvas */
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}

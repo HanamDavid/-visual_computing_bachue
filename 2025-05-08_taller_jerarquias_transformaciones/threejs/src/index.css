@@ -1,0 +1,54 @@
+:root {
+  font-family: 'VT323', monospace;
+  line-height: 1.2;
+  color-scheme: light dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body { /* O el elemento al que quieras aplicar el fondo */
+  background-color: #373131; /* Un color de fondo base para que se noten los cuadrados transparentes */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 15px,
+    black 15px,
+    black 16px
+  ), repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 15px,
+    black 15px,
+    black 16px
+  );
+  background-size: 42px 42px; /* El tamaño del patrón (borde + espacio) */
+}
+
+.app-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Estilos para el área principal de contenido */
+.main-content {
+  flex-grow: 1; /* Permite que el contenido ocupe el espacio restante */
+}
+
+.main-content canvas {
+    display: block; /* Evita espacio extra bajo el canvas */
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
