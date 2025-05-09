@@ -27,7 +27,8 @@ Especifica los entornos usados:
 
 ---
 ## 🧪 Implementación
-
+ ![animacion_transformaciones](./1.gif)
+![three](./1.png)
 Se trato de implementar todo con inyeccion de dependencias y modularidad para lograr completar la tarea exitosamente
 ### 🌐 Three.js con React Three Fiber
 1.  Creación del proyecto con Vite y React Three Fiber.
@@ -39,7 +40,8 @@ Se trato de implementar todo con inyeccion de dependencias y modularidad para lo
     - `Wireframe` material para ver las caras como líneas.
     
 🎮 Unity (versión LTS) (Opcional)
-
+![doggo](./dog.png)
+![doggo](./wireframeDog.png)
     Creación de una escena 3D.
     Importación de un archivo .OBJ o .STL al proyecto.
     Adición del modelo importado a la escena.
