@@ -30,11 +30,17 @@ Bachue se construye sobre una arquitectura de microservicios robusta y desacopla
 
 ```mermaid
 graph LR
+    %% Bloque izquierdo
     Frontend --> Gateway
-    Gateway --> Auth[Auth Service (Go)]
-    Gateway --> UserData[User Data Service (Go)]
-    Gateway --> MLService[ML Service (FastAPI)]
-    Gateway --> DataAnalysis[Data Analysis Service (FastAPI)]
+    Gateway --> Auth[Auth]
+    Gateway --> UserData[User Data]
+    Gateway --> DataAnalysis[Data Analysis]
+    Gateway --> ModelService[Model Service]
 
-    MLService -- "Genera Datos (JSON)" --> UserData
-    UserData -- "Guarda y Recupera Datos (JSON)" --> DataAnalysis
+    %% Bloque derecho
+    ModelService -- "json\nGenera Datos" --> UserData
+    UserData -- "json\nGuarda los datos" --> DataAnalysis
+    DataAnalysis -- "json\nProcesa datos" --> UserData
+
+
+
