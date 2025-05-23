@@ -68,3 +68,12 @@ Conversión a HSV y LAB con OpenCV.
 Este taller nos permitió comprender de forma práctica cómo se representan y transforman los colores en distintos espacios como HSV y LAB. Aprendimos cómo afectan estos modelos a la percepción del color y cómo pueden utilizarse para simular condiciones visuales como el daltonismo o la baja iluminación.
 
 La parte más interesante fue simular la protanopía mediante matrices y filtros personalizados en HSV. Fue retador lograr que los cambios se notaran de manera visual clara, y aprender cómo manipular imágenes a nivel de canal resultó clave. Para futuros proyectos, nos gustaría expandir este ejercicio integrando modelos de IA o detección automática de objetos y aplicar estos filtros dinámicamente.
+
+## ✅ Checklist de Entrega
+
+- [x] Carpeta `YYYY-MM-DD_nombre_taller`
+- [x] Código limpio y funcional
+- [x] GIF incluido con nombre descriptivo (si el taller lo requiere)
+- [x] Visualizaciones o métricas exportadas
+- [x] README completo y claro
+- [x] Commits descriptivos en inglés
