@@ -109,7 +109,8 @@ Para crear interfaces gráficas en React Three Fiber, se recomienda usar la libr
 En este taller desarrollaste un controlador de cámara en Unity que permite mover la cámara usando las teclas W, A, S y D para desplazarte en el plano horizontal manteniendo una altura constante, y rotarla con el movimiento del mouse para simular una vista libre. Además, implementaste la detección del clic del mouse para ejecutar una acción, integrando conceptos clave de entrada de usuario, control de transformaciones y manejo de vectores para lograr un control de cámara básico pero funcional en un entorno 3D.
 
 ### 📸 Capturas o GIFs
-https://github.com/user-attachments/assets/22acf8ba-0447-4d8f-87b2-793bc08bc525
+![2025-05-23 22-24-08](https://github.com/user-attachments/assets/fe15099e-0a72-4469-922a-916920bbae64)
+
 
 ### 🎯 Codigo Relevante
     using UnityEngine;
