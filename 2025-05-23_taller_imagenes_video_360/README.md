@@ -1,7 +1,7 @@
 # 🌀 Taller 64 - Visualización de Imágenes y Video 360° en Unity y Three.js
 
 ## 📅 Fecha
-2025-05-23 – Fecha de entrega o realización
+2025-05-23 
 
 ---
 
@@ -32,22 +32,6 @@ Aprender a cargar e integrar imágenes panorámicas (equirectangulares) y videos
 
 ---
 
-## 📁 Estructura del Proyecto
-
-2025-05-23_taller_imagenes_video_360/
-├── unity/
-│ ├── Assets/Panoramas/
-│ ├── Scripts/
-├── threejs/
-│ ├── public/video360.mp4
-│ ├── public/panorama.jpg
-│ ├── src/components/Scene.jsx
-├
-│
-│-- imagen360_threejs.gif
-├── README.md
-
----
 
 ## 🧪 Implementación
 
@@ -59,8 +43,6 @@ Aprender a cargar e integrar imágenes panorámicas (equirectangulares) y videos
 5. Interacción y pruebas de navegación inmersiva
 
 ### 🔹 Código relevante
-
-
 
 React + Three.js – VideoTexture 360°:
 
