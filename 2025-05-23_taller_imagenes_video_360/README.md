@@ -16,15 +16,13 @@ Aprender a cargar e integrar imágenes panorámicas (equirectangulares) y videos
 - [x] Transformaciones geométricas (escala, rotación)
 - [x] Shaders y proyección esférica
 - [x] Integración de texturas en 360°
-- [x] Uso de VideoPlayer (Unity) y VideoTexture (Three.js)
+- [x] Uso de VideoTexture (Three.js)
 - [x] Navegación en escena con controles de cámara
-- [x] Otro: Visualización inmersiva en experiencias XR
 
 ---
 
 ## 🔧 Herramientas y Entornos
 
-- Unity 2022 LTS
 - Three.js con React Three Fiber
 - React + Vite + Tailwind
 - VSCode / Rider / Unity Editor
