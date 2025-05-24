@@ -1,162 +1,169 @@
-# Taller de Jerarquías y Transformaciones
+# Taller Modelado Procedural Básico
 
 ## Three.Js
 
-A través de los controles Leva se pudo controlar la velocidad de rotacion, posicion en X y Z. De esta manera atribuyendole estas caracteristicas al padre pudimos visualizar el comportamiento de los hijos.
+En este taller se construyó una escena 3D interactiva usando React Three Fiber, donde se distribuyeron varias cajas en el espacio y se implementó una cámara conmutada entre perspectiva y ortográfica. Se integraron controles de órbita para manipular la vista en tiempo real y se añadió un panel informativo que muestra dinámicamente los parámetros clave de la cámara activa, como el tipo, el campo de visión, los planos de recorte y los límites del encuadre, lo cual facilita la comprensión visual del comportamiento de cada tipo de cámara.
 
 ### 📸 Capturas o GIFs
-![2025-05-01 19-00-36](https://github.com/user-attachments/assets/553c4399-4f07-47b8-8275-9cca3156a85e)
+![2025-05-23 19-36-52](https://github.com/user-attachments/assets/6b2332b4-0329-484d-9a5a-34aa17494a5a)
+
 
 ### 🎯 Codigo Relevante
 
-    import './App.css'
-    import { Canvas, useFrame } from '@react-three/fiber'
-    import { OrbitControls } from '@react-three/drei'
-    import { useRef } from 'react'
-    import { Leva, useControls } from 'leva'
+    // Título superpuesto
+    function Title() {
+      return (
+        <h1 style={{
+          position: 'absolute',
+          top: '20px',
+          width: '100%',
+          textAlign: 'center',
+          fontSize: '3rem',
+          color: 'white',
+          textShadow: '2px 2px 6px black',
+          zIndex: 10
+        }}>
+          Taller modelado procedural básico
+        </h1>
+      );
+    }
     
-    function AnimatedGroup() {
-      const groupRef = useRef()
-      const childGroupRef = useRef()
-    
-      // Controles de Leva
-      const { rotationSpeed, positionX, positionZ } = useControls({
-        rotationSpeed: { value: 0.03, min: 0, max: 0.1, step: 0.01 },
-        positionX: { value: 0, min: -5, max: 5, step: 0.1 },
-        positionZ: { value: 0, min: -5, max: 5, step: 0.1 },
-      })
-    
-      useFrame(({ clock }) => {
-        const t = clock.getElapsedTime()
-        // Movimiento circular del grupo principal
-        groupRef.current.position.x = positionX + Math.sin(t) * 2
-        groupRef.current.position.z = positionZ + Math.cos(t) * 2
-        groupRef.current.rotation.y += rotationSpeed
-    
-        // Rotación adicional para el grupo hijo
-        if (childGroupRef.current) {
-          childGroupRef.current.rotation.x += 0.02
-          childGroupRef.current.rotation.z += 0.02
+    // Cubos en cuadrícula
+    function GridOfBoxes() {
+      const size = 5;
+      const spacing = 2;
+      const boxes = useMemo(() => {
+        const arr = [];
+        for (let x = -size; x <= size; x++) {
+          for (let z = -size; z <= size; z++) {
+            arr.push([x * spacing, 0, z * spacing]);
+          }
         }
-      })
+        return arr;
+      }, []);
+    
+      return boxes.map(([x, y, z], i) => (
+        <mesh key={i} position={[x, y, z]}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="orange" />
+        </mesh>
+      ));
+    }
+    
+    // Esferas en espiral
+    function SpiralOfSpheres() {
+      const spheres = useMemo(() => {
+        const arr = [];
+        const count = 100;
+        for (let i = 0; i < count; i++) {
+          const angle = i * 0.2;
+          const radius = i * 0.1;
+          const x = Math.cos(angle) * radius;
+          const y = i * 0.1;
+          const z = Math.sin(angle) * radius;
+          arr.push([x, y, z]);
+        }
+        return arr;
+      }, []);
+    
+      return spheres.map(([x, y, z], i) => (
+        <mesh key={i} position={[x, y, z]}>
+          <sphereGeometry args={[0.3, 16, 16]} />
+          <meshStandardMaterial color="skyblue" />
+        </mesh>
+      ));
+    }
+    
+    // Deformación animada de un plano
+    function DeformedPlane() {
+      const ref = useRef();
+    
+      useFrame(() => {
+        if (ref.current) {
+          const time = performance.now() * 0.001;
+          const posAttr = ref.current.geometry.attributes.position;
+          for (let i = 0; i < posAttr.count; i++) {
+            const x = posAttr.getX(i);
+            const z = posAttr.getZ(i);
+            const y = Math.sin(x * 2 + time) * Math.cos(z * 2 + time);
+            posAttr.setY(i, y);
+          }
+          posAttr.needsUpdate = true;
+        }
+      });
     
       return (
-        <group ref={groupRef}>
-          {/* Hijo 1 */}
-          <mesh position={[-1.5, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshNormalMaterial />
+        <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
+          <planeGeometry args={[20, 20, 100, 100]} />
+          <meshStandardMaterial color="lightgreen" wireframe />
+        </mesh>
+      );
+    }
+    
+    // Árbol fractal recursivo
+    function FractalBranch({ depth = 0, maxDepth = 4, length = 2, scale = 0.7 }) {
+      const ref = useRef();
+    
+      useFrame(() => {
+        if (ref.current) {
+          ref.current.rotation.y += 0.002;
+        }
+      });
+    
+      if (depth > maxDepth) return null;
+    
+      const childProps = {
+        depth: depth + 1,
+        maxDepth,
+        length: length * scale,
+        scale,
+      };
+    
+      return (
+        <group ref={ref}>
+          <mesh position={[0, length / 2, 0]}>
+            <cylinderGeometry args={[0.1, 0.2, length, 8]} />
+            <meshStandardMaterial color="brown" />
           </mesh>
-          {/* Hijo 2 */}
-          <group ref={childGroupRef} position={[1.5, 0, 0]}>
-            <mesh>
-              <sphereGeometry args={[0.5, 20, 20]} />
-              <meshStandardMaterial color="orange" />
-            </mesh>
-            {/* Hijo de la esfera */}
-            <mesh position={[0, 1, 0]}>
-              <torusGeometry args={[0.3, 0.1, 16, 100]} />
-              <meshStandardMaterial color="green" />
-            </mesh>
+          <group position={[0, length, 0]}>
+            <group rotation={[0.5, 0, 0]}>
+              <FractalBranch {...childProps} />
+            </group>
+            <group rotation={[-0.5, 0, 0]}>
+              <FractalBranch {...childProps} />
+            </group>
+            <group rotation={[0, 0.5, 0]}>
+              <FractalBranch {...childProps} />
+            </group>
+            <group rotation={[0, -0.5, 0]}>
+              <FractalBranch {...childProps} />
+            </group>
           </group>
-          {/* Hijo 3 */}
-          <mesh position={[0, 1.5, 2]}>
-            <coneGeometry args={[0.5, 1, 32]} />
-            <meshStandardMaterial color="blue" />
-          </mesh>
         </group>
-      )
+      );
     }
     
-    function App() {
+    // Componente principal
+    export default function App() {
       return (
-        <>
-          <h1>3D NIKO</h1>
-          <Leva collapsed />
-          <div className="canvas-container">
-            <Canvas>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 10]} />
-              <AnimatedGroup />
-              <OrbitControls />
-            </Canvas>
-          </div>
-        </>
-      )
+        <div style={{ height: '100vh', width: '100vw', overflow: 'hidden' }}>
+          <Title />
+          <Canvas camera={{ position: [0, 10, 25], fov: 60 }}>
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 20, 10]} />
+            <GridOfBoxes />
+            <SpiralOfSpheres />
+            <DeformedPlane />
+            <FractalBranch />
+          </Canvas>
+        </div>
+      );
     }
-    
-    export default App
-
-### Comentarios personales sobre el aprendizaje y dificultades encontradas.
-
-Muy didáctica la manera en que de poco en poco con el taller anterior vamos aprendiendo nociones basicas de esta libreria
 
 ## Unity
 
-Este script permite al usuario modificar la posición en X, la rotación en Y, y la escala en Z de un objeto 3D llamado "Father" usando sliders en una interfaz UI. Cada vez que se modifica un slider, los nuevos valores del objeto se muestran en la consola de Unity usando Debug.Log.
 
 ### 📸 Capturas o GIFs
-![2025-05-01 21-54-23](https://github.com/user-attachments/assets/c27bbdb6-d49c-4d1d-a578-3704c3555f48)
+
 
 ### 🎯 Codigo Relevante
-
-    using UnityEngine;
-    using UnityEngine.UI;
-
-    public class FatherTransformControl : MonoBehaviour
-    {
-    public Transform father;
-
-    public Slider sliderPosX;
-    public Slider sliderRotY;
-    public Slider sliderScaleZ;
-
-    void Start()
-    {
-        // Inicializa sliders
-        sliderPosX.value = father.localPosition.x;
-        sliderRotY.value = father.localEulerAngles.y;
-        sliderScaleZ.value = father.localScale.z;
-
-        // Listeners
-        sliderPosX.onValueChanged.AddListener((v) => UpdatePosition());
-        sliderRotY.onValueChanged.AddListener((v) => UpdateRotation());
-        sliderScaleZ.onValueChanged.AddListener((v) => UpdateScale());
-
-        // Mostrar valores iniciales
-        LogTransform("Inicial");
-    }
-
-    void UpdatePosition()
-    {
-        Vector3 pos = father.localPosition;
-        pos.x = sliderPosX.value;
-        father.localPosition = pos;
-        LogTransform("Posición actualizada");
-    }
-
-    void UpdateRotation()
-    {
-        Vector3 rot = father.localEulerAngles;
-        rot.y = sliderRotY.value;
-        father.localEulerAngles = rot;
-        LogTransform("Rotación actualizada");
-    }
-
-    void UpdateScale()
-    {
-        Vector3 scale = father.localScale;
-        scale.z = sliderScaleZ.value;
-        father.localScale = scale;
-        LogTransform("Escala actualizada");
-    }
-
-    void LogTransform(string evento)
-    {
-        Debug.Log($"[{evento}] Pos: {father.localPosition}, Rot: {father.localEulerAngles}, Scale: {father.localScale}");
-    }
-    }
-
-### Comentarios personales sobre el aprendizaje y dificultades encontradas.
-
-Es una buena introduccion a sistemas mas complejos de jerarquía en Unity
