@@ -1,162 +1,119 @@
-# Taller de Jerarquías y Transformaciones
+# Taller input UI Unity y Three.Js
 
 ## Three.Js
 
-A través de los controles Leva se pudo controlar la velocidad de rotacion, posicion en X y Z. De esta manera atribuyendole estas caracteristicas al padre pudimos visualizar el comportamiento de los hijos.
+Para crear interfaces gráficas en React Three Fiber, se recomienda usar la librería @react-three/drei, que permite insertar elementos HTML en el espacio 3D mediante el componente <Html />, ideal para botones, textos o formularios flotantes sobre objetos 3D. También se puede usar leva para crear paneles interactivos con sliders y switches que controlan propiedades como posición, rotación o color. Estas herramientas permiten integrar controles intuitivos directamente en la escena 3D o como superposición fija en pantalla con react-dom, mejorando la interactividad sin salir del entorno gráfico.
 
 ### 📸 Capturas o GIFs
-![2025-05-01 19-00-36](https://github.com/user-attachments/assets/553c4399-4f07-47b8-8275-9cca3156a85e)
+![2025-05-23 20-10-29](https://github.com/user-attachments/assets/1158e0c7-ecd0-4bd0-9e10-6916210628af)
+
 
 ### 🎯 Codigo Relevante
 
-    import './App.css'
+    import React, { useRef, useState, useEffect } from 'react'
     import { Canvas, useFrame } from '@react-three/fiber'
     import { OrbitControls } from '@react-three/drei'
-    import { useRef } from 'react'
-    import { Leva, useControls } from 'leva'
     
-    function AnimatedGroup() {
-      const groupRef = useRef()
-      const childGroupRef = useRef()
+    function InteractiveCube() {
+      const meshRef = useRef()
+      const [hovered, setHovered] = useState(false)
+      const [position, setPosition] = useState([0, 0, 0])
     
-      // Controles de Leva
-      const { rotationSpeed, positionX, positionZ } = useControls({
-        rotationSpeed: { value: 0.03, min: 0, max: 0.1, step: 0.01 },
-        positionX: { value: 0, min: -5, max: 5, step: 0.1 },
-        positionZ: { value: 0, min: -5, max: 5, step: 0.1 },
-      })
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if (e.key === 'r') setPosition([0, 0, 0])
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+      }, [])
     
-      useFrame(({ clock }) => {
-        const t = clock.getElapsedTime()
-        // Movimiento circular del grupo principal
-        groupRef.current.position.x = positionX + Math.sin(t) * 2
-        groupRef.current.position.z = positionZ + Math.cos(t) * 2
-        groupRef.current.rotation.y += rotationSpeed
-    
-        // Rotación adicional para el grupo hijo
-        if (childGroupRef.current) {
-          childGroupRef.current.rotation.x += 0.02
-          childGroupRef.current.rotation.z += 0.02
+      useFrame(() => {
+        if (hovered && meshRef.current) {
+          meshRef.current.rotation.y += 0.01
         }
       })
     
       return (
-        <group ref={groupRef}>
-          {/* Hijo 1 */}
-          <mesh position={[-1.5, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshNormalMaterial />
-          </mesh>
-          {/* Hijo 2 */}
-          <group ref={childGroupRef} position={[1.5, 0, 0]}>
-            <mesh>
-              <sphereGeometry args={[0.5, 20, 20]} />
-              <meshStandardMaterial color="orange" />
-            </mesh>
-            {/* Hijo de la esfera */}
-            <mesh position={[0, 1, 0]}>
-              <torusGeometry args={[0.3, 0.1, 16, 100]} />
-              <meshStandardMaterial color="green" />
-            </mesh>
-          </group>
-          {/* Hijo 3 */}
-          <mesh position={[0, 1.5, 2]}>
-            <coneGeometry args={[0.5, 1, 32]} />
-            <meshStandardMaterial color="blue" />
-          </mesh>
-        </group>
+        <mesh
+          ref={meshRef}
+          position={position}
+          scale={[2.5, 2.5, 2.5]}
+          onClick={() => setPosition([Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1])}
+          onPointerOver={() => setHovered(true)}
+          onPointerOut={() => setHovered(false)}
+        >
+          <boxGeometry />
+          <meshStandardMaterial color={hovered ? 'orange' : 'skyblue'} />
+        </mesh>
       )
     }
     
-    function App() {
+    export default function Scene() {
       return (
-        <>
-          <h1>3D NIKO</h1>
-          <Leva collapsed />
-          <div className="canvas-container">
-            <Canvas>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 10]} />
-              <AnimatedGroup />
-              <OrbitControls />
-            </Canvas>
+        <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+          {/* Título HTML */}
+          <h1 style={{
+            position: 'absolute',
+            top: 10,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            background: 'rgba(255, 255, 255, 0.8)',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            zIndex: 10
+          }}>
+            Entrada del Usuario e Interfaz UI
+          </h1>
+    
+          {/* Canvas de Three.js */}
+          <Canvas
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+            }}
+            camera={{ position: [0, 0, 4] }}
+          >
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} />
+            <InteractiveCube />
+            <OrbitControls />
+          </Canvas>
+    
+          {/* UI flotante */}
+          <div style={{
+            position: 'absolute',
+            top: 60,
+            left: 20,
+            background: 'blue',
+            padding: 10,
+            borderRadius: 8,
+            zIndex: 5
+          }}>
+            <p><strong>Controles:</strong></p>
+            <ul>
+              <li>Haz clic en el cubo para moverlo.</li>
+              <li>Pasa el mouse para hacerlo rotar.</li>
+              <li>Presiona <code>r</code> para reiniciar su posición.</li>
+            </ul>
           </div>
-        </>
+        </div>
       )
     }
-    
-    export default App
-
-### Comentarios personales sobre el aprendizaje y dificultades encontradas.
-
-Muy didáctica la manera en que de poco en poco con el taller anterior vamos aprendiendo nociones basicas de esta libreria
 
 ## Unity
 
-Este script permite al usuario modificar la posición en X, la rotación en Y, y la escala en Z de un objeto 3D llamado "Father" usando sliders en una interfaz UI. Cada vez que se modifica un slider, los nuevos valores del objeto se muestran en la consola de Unity usando Debug.Log.
+
 
 ### 📸 Capturas o GIFs
-![2025-05-01 21-54-23](https://github.com/user-attachments/assets/c27bbdb6-d49c-4d1d-a578-3704c3555f48)
+
 
 ### 🎯 Codigo Relevante
 
-    using UnityEngine;
-    using UnityEngine.UI;
-
-    public class FatherTransformControl : MonoBehaviour
-    {
-    public Transform father;
-
-    public Slider sliderPosX;
-    public Slider sliderRotY;
-    public Slider sliderScaleZ;
-
-    void Start()
-    {
-        // Inicializa sliders
-        sliderPosX.value = father.localPosition.x;
-        sliderRotY.value = father.localEulerAngles.y;
-        sliderScaleZ.value = father.localScale.z;
-
-        // Listeners
-        sliderPosX.onValueChanged.AddListener((v) => UpdatePosition());
-        sliderRotY.onValueChanged.AddListener((v) => UpdateRotation());
-        sliderScaleZ.onValueChanged.AddListener((v) => UpdateScale());
-
-        // Mostrar valores iniciales
-        LogTransform("Inicial");
-    }
-
-    void UpdatePosition()
-    {
-        Vector3 pos = father.localPosition;
-        pos.x = sliderPosX.value;
-        father.localPosition = pos;
-        LogTransform("Posición actualizada");
-    }
-
-    void UpdateRotation()
-    {
-        Vector3 rot = father.localEulerAngles;
-        rot.y = sliderRotY.value;
-        father.localEulerAngles = rot;
-        LogTransform("Rotación actualizada");
-    }
-
-    void UpdateScale()
-    {
-        Vector3 scale = father.localScale;
-        scale.z = sliderScaleZ.value;
-        father.localScale = scale;
-        LogTransform("Escala actualizada");
-    }
-
-    void LogTransform(string evento)
-    {
-        Debug.Log($"[{evento}] Pos: {father.localPosition}, Rot: {father.localEulerAngles}, Scale: {father.localScale}");
-    }
-    }
-
 ### Comentarios personales sobre el aprendizaje y dificultades encontradas.
 
-Es una buena introduccion a sistemas mas complejos de jerarquía en Unity
+
