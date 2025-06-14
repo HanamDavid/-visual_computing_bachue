@@ -1,0 +1,16 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.container{
+    background-color: whitesmoke;
+    border-radius: 20px;
+}
+
+h1{
+    color: #ff495c;
+    font-weight: bold;
+}

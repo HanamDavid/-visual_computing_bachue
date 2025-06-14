@@ -1,0 +1,7 @@
+.container{
+    width: 70vw;
+    height: 85vh;
+    background-color: #F2AA7E;
+    padding: 1rem;
+    overflow: hidden; /* Asegura que los hijos no se desborden */
+}
