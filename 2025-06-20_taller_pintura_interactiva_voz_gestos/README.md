@@ -1,162 +1,98 @@
-# Taller de Jerarquías y Transformaciones
+# Taller - Obras Interactivas: Pintando con Voz y Gestos
 
-## Three.Js
-
-A través de los controles Leva se pudo controlar la velocidad de rotacion, posicion en X y Z. De esta manera atribuyendole estas caracteristicas al padre pudimos visualizar el comportamiento de los hijos.
+## Python
+En este taller se desarrolló una aplicación interactiva que combina visión por computadora y reconocimiento de voz para crear un lienzo digital controlado por gestos de la mano y comandos hablados. Utilizando MediaPipe Hands se detectó la posición del dedo índice para simular un pincel sobre la pantalla, mientras que con la librería speech_recognition se interpretaron comandos simples como "rojo", "verde", "limpiar" o "guardar" para cambiar el color del pincel, borrar el lienzo o guardar la obra. Todo se integró en tiempo real con OpenCV, permitiendo una experiencia creativa sin necesidad de interfaces físicas.
 
 ### 📸 Capturas o GIFs
-![2025-05-01 19-00-36](https://github.com/user-attachments/assets/553c4399-4f07-47b8-8275-9cca3156a85e)
+![Video de WhatsApp 2025-06-20 a las 22 06 34_8347a271 (1)](https://github.com/user-attachments/assets/b42e1833-744e-4fbb-a417-f4f64790ae3f)
+
 
 ### 🎯 Codigo Relevante
-
-    import './App.css'
-    import { Canvas, useFrame } from '@react-three/fiber'
-    import { OrbitControls } from '@react-three/drei'
-    import { useRef } from 'react'
-    import { Leva, useControls } from 'leva'
     
-    function AnimatedGroup() {
-      const groupRef = useRef()
-      const childGroupRef = useRef()
+    # MediaPipe Hands
+    mp_hands = mp.solutions.hands
+    hands = mp_hands.Hands(max_num_hands=1)
+    mp_draw = mp.solutions.drawing_utils
     
-      // Controles de Leva
-      const { rotationSpeed, positionX, positionZ } = useControls({
-        rotationSpeed: { value: 0.03, min: 0, max: 0.1, step: 0.01 },
-        positionX: { value: 0, min: -5, max: 5, step: 0.1 },
-        positionZ: { value: 0, min: -5, max: 5, step: 0.1 },
-      })
+    # Reconocimiento de voz (funciona en hilo separado)
+    def escuchar_comandos():
+        global color, canvas, drawing
+        recognizer = sr.Recognizer()
+        mic = sr.Microphone()
+        with mic as source:
+            recognizer.adjust_for_ambient_noise(source)
+        while True:
+            try:
+                with mic as source:
+                    print("Escuchando comando de voz...")
+                    audio = recognizer.listen(source, timeout=5)
+                texto = recognizer.recognize_google(audio, language="es-ES").lower()
+                print("Comando reconocido:", texto)
     
-      useFrame(({ clock }) => {
-        const t = clock.getElapsedTime()
-        // Movimiento circular del grupo principal
-        groupRef.current.position.x = positionX + Math.sin(t) * 2
-        groupRef.current.position.z = positionZ + Math.cos(t) * 2
-        groupRef.current.rotation.y += rotationSpeed
+                if "rojo" in texto:
+                    color = (0, 0, 255)
+                elif "verde" in texto:
+                    color = (0, 255, 0)
+                elif "azul" in texto:
+                    color = (255, 0, 0)
+                elif "limpiar" in texto:
+                    canvas[:] = 0
+                elif "guardar" in texto:
+                    cv2.imwrite("obra.png", canvas)
+                    print("Imagen guardada como obra.png")
+                elif "pincel" in texto:
+                    drawing = not drawing
     
-        // Rotación adicional para el grupo hijo
-        if (childGroupRef.current) {
-          childGroupRef.current.rotation.x += 0.02
-          childGroupRef.current.rotation.z += 0.02
-        }
-      })
+            except sr.UnknownValueError:
+                print("No se entendió el comando.")
+            except sr.WaitTimeoutError:
+                continue
+            except Exception as e:
+                print("Error de voz:", e)
     
-      return (
-        <group ref={groupRef}>
-          {/* Hijo 1 */}
-          <mesh position={[-1.5, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshNormalMaterial />
-          </mesh>
-          {/* Hijo 2 */}
-          <group ref={childGroupRef} position={[1.5, 0, 0]}>
-            <mesh>
-              <sphereGeometry args={[0.5, 20, 20]} />
-              <meshStandardMaterial color="orange" />
-            </mesh>
-            {/* Hijo de la esfera */}
-            <mesh position={[0, 1, 0]}>
-              <torusGeometry args={[0.3, 0.1, 16, 100]} />
-              <meshStandardMaterial color="green" />
-            </mesh>
-          </group>
-          {/* Hijo 3 */}
-          <mesh position={[0, 1.5, 2]}>
-            <coneGeometry args={[0.5, 1, 32]} />
-            <meshStandardMaterial color="blue" />
-          </mesh>
-        </group>
-      )
-    }
+    # Lanzar hilo de voz
+    threading.Thread(target=escuchar_comandos, daemon=True).start()
     
-    function App() {
-      return (
-        <>
-          <h1>3D NIKO</h1>
-          <Leva collapsed />
-          <div className="canvas-container">
-            <Canvas>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 10]} />
-              <AnimatedGroup />
-              <OrbitControls />
-            </Canvas>
-          </div>
-        </>
-      )
-    }
+    # Activar webcam
+    cap = cv2.VideoCapture(0)
+    prev_x, prev_y = 0, 0
     
-    export default App
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frame = cv2.flip(frame, 1)
+        h, w, _ = frame.shape
+    
+        # Detección de manos
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        result = hands.process(rgb)
+    
+        if result.multi_hand_landmarks:
+            for hand_landmarks in result.multi_hand_landmarks:
+                mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+    
+                # Coordenadas del dedo índice
+                index = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+                x, y = int(index.x * w), int(index.y * h)
+    
+                # Dibujar en el lienzo
+                if drawing:
+                    if prev_x == 0 and prev_y == 0:
+                        prev_x, prev_y = x, y
+                    cv2.line(canvas, (prev_x, prev_y), (x, y), color, 5)
+                    prev_x, prev_y = x, y
+                else:
+                    prev_x, prev_y = 0, 0  # reiniciar si no se está dibujando
+    
+        # Mostrar el lienzo sobre el video
+        output = cv2.addWeighted(frame, 0.5, canvas, 0.5, 0)
+    
+        cv2.imshow("Dibujo con Gestos y Voz", output)
+        if cv2.waitKey(1) & 0xFF == 27:  # tecla ESC para salir
+            break
+    
 
 ### Comentarios personales sobre el aprendizaje y dificultades encontradas.
 
-Muy didáctica la manera en que de poco en poco con el taller anterior vamos aprendiendo nociones basicas de esta libreria
-
-## Unity
-
-Este script permite al usuario modificar la posición en X, la rotación en Y, y la escala en Z de un objeto 3D llamado "Father" usando sliders en una interfaz UI. Cada vez que se modifica un slider, los nuevos valores del objeto se muestran en la consola de Unity usando Debug.Log.
-
-### 📸 Capturas o GIFs
-![2025-05-01 21-54-23](https://github.com/user-attachments/assets/c27bbdb6-d49c-4d1d-a578-3704c3555f48)
-
-### 🎯 Codigo Relevante
-
-    using UnityEngine;
-    using UnityEngine.UI;
-
-    public class FatherTransformControl : MonoBehaviour
-    {
-    public Transform father;
-
-    public Slider sliderPosX;
-    public Slider sliderRotY;
-    public Slider sliderScaleZ;
-
-    void Start()
-    {
-        // Inicializa sliders
-        sliderPosX.value = father.localPosition.x;
-        sliderRotY.value = father.localEulerAngles.y;
-        sliderScaleZ.value = father.localScale.z;
-
-        // Listeners
-        sliderPosX.onValueChanged.AddListener((v) => UpdatePosition());
-        sliderRotY.onValueChanged.AddListener((v) => UpdateRotation());
-        sliderScaleZ.onValueChanged.AddListener((v) => UpdateScale());
-
-        // Mostrar valores iniciales
-        LogTransform("Inicial");
-    }
-
-    void UpdatePosition()
-    {
-        Vector3 pos = father.localPosition;
-        pos.x = sliderPosX.value;
-        father.localPosition = pos;
-        LogTransform("Posición actualizada");
-    }
-
-    void UpdateRotation()
-    {
-        Vector3 rot = father.localEulerAngles;
-        rot.y = sliderRotY.value;
-        father.localEulerAngles = rot;
-        LogTransform("Rotación actualizada");
-    }
-
-    void UpdateScale()
-    {
-        Vector3 scale = father.localScale;
-        scale.z = sliderScaleZ.value;
-        father.localScale = scale;
-        LogTransform("Escala actualizada");
-    }
-
-    void LogTransform(string evento)
-    {
-        Debug.Log($"[{evento}] Pos: {father.localPosition}, Rot: {father.localEulerAngles}, Scale: {father.localScale}");
-    }
-    }
-
-### Comentarios personales sobre el aprendizaje y dificultades encontradas.
-
-Es una buena introduccion a sistemas mas complejos de jerarquía en Unity
+Muy didáctica la manera en que de poco en poco con el taller anterior vamos aprendiendo nociones basicas de esta libreria y el modelo YOLO
