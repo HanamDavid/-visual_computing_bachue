@@ -1,162 +1,74 @@
-# Taller de Jerarquías y Transformaciones
+# Taller - Cámara en Vivo: Captura y Procesamiento de Video en Tiempo Real con YOLO
 
-## Three.Js
-
-A través de los controles Leva se pudo controlar la velocidad de rotacion, posicion en X y Z. De esta manera atribuyendole estas caracteristicas al padre pudimos visualizar el comportamiento de los hijos.
+## Python
+Se desarrolló una aplicación en Python que captura video en tiempo real con OpenCV, aplicando filtros básicos como escala de grises, binarización y detección de bordes. Además, se integró el modelo YOLOv5 para realizar detección de objetos en cada fotograma, dibujando cajas y etiquetas sobre los objetos reconocidos. La aplicación permite controlar la visualización mediante el teclado: cambiar filtros, pausar o reanudar la captura, y guardar imágenes procesadas. Todo se muestra en ventanas simultáneas para facilitar el análisis visual.
 
 ### 📸 Capturas o GIFs
-![2025-05-01 19-00-36](https://github.com/user-attachments/assets/553c4399-4f07-47b8-8275-9cca3156a85e)
+![Untitled ‑ Made with FlexClip](https://github.com/user-attachments/assets/915a3232-b660-4897-903a-006e432dade2)
+
 
 ### 🎯 Codigo Relevante
 
-    import './App.css'
-    import { Canvas, useFrame } from '@react-three/fiber'
-    import { OrbitControls } from '@react-three/drei'
-    import { useRef } from 'react'
-    import { Leva, useControls } from 'leva'
+    print("Controles:")
+    print("  F - Cambiar filtro")
+    print("  P - Pausar/reanudar")
+    print("  S - Guardar imagen")
+    print("  Q - Salir")
     
-    function AnimatedGroup() {
-      const groupRef = useRef()
-      const childGroupRef = useRef()
+    while True:
+        if not paused:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+        frame_yolo = frame.copy()
+        resultados = model.predict(frame_yolo, verbose=False)[0]
+
+        # Dibujar cajas
+        for r in resultados.boxes:
+            x1, y1, x2, y2 = map(int, r.xyxy[0])
+            conf = r.conf[0]
+            cls = int(r.cls[0])
+            label = f"{model.names[cls]} {conf:.2f}"
+            cv2.rectangle(frame_yolo, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(frame_yolo, label, (x1, y1 - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+        # Aplicar filtros
+        if filtro == 0:
+            filtro_aplicado = frame.copy()
+        elif filtro == 1:
+            filtro_aplicado = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        elif filtro == 2:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            _, filtro_aplicado = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        elif filtro == 3:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            filtro_aplicado = cv2.Canny(gray, 100, 200)
+
+        # Mostrar ventanas
+        cv2.imshow('YOLOv5 Detección', frame_yolo)
+        titulo_filtro = ['Original', 'Grises', 'Binarización', 'Bordes'][filtro]
+        cv2.imshow(f'Filtro: {titulo_filtro}', filtro_aplicado)
+
+    # Controles
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
+        break
+    elif key == ord('f'):
+        filtro = (filtro + 1) % 4
+    elif key == ord('p'):
+        paused = not paused
+    elif key == ord('s'):
+        cv2.imwrite(f'captura_{save_count}.png', filtro_aplicado)
+        print(f'Imagen guardada como captura_{save_count}.png')
+        save_count += 1
     
-      // Controles de Leva
-      const { rotationSpeed, positionX, positionZ } = useControls({
-        rotationSpeed: { value: 0.03, min: 0, max: 0.1, step: 0.01 },
-        positionX: { value: 0, min: -5, max: 5, step: 0.1 },
-        positionZ: { value: 0, min: -5, max: 5, step: 0.1 },
-      })
-    
-      useFrame(({ clock }) => {
-        const t = clock.getElapsedTime()
-        // Movimiento circular del grupo principal
-        groupRef.current.position.x = positionX + Math.sin(t) * 2
-        groupRef.current.position.z = positionZ + Math.cos(t) * 2
-        groupRef.current.rotation.y += rotationSpeed
-    
-        // Rotación adicional para el grupo hijo
-        if (childGroupRef.current) {
-          childGroupRef.current.rotation.x += 0.02
-          childGroupRef.current.rotation.z += 0.02
-        }
-      })
-    
-      return (
-        <group ref={groupRef}>
-          {/* Hijo 1 */}
-          <mesh position={[-1.5, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshNormalMaterial />
-          </mesh>
-          {/* Hijo 2 */}
-          <group ref={childGroupRef} position={[1.5, 0, 0]}>
-            <mesh>
-              <sphereGeometry args={[0.5, 20, 20]} />
-              <meshStandardMaterial color="orange" />
-            </mesh>
-            {/* Hijo de la esfera */}
-            <mesh position={[0, 1, 0]}>
-              <torusGeometry args={[0.3, 0.1, 16, 100]} />
-              <meshStandardMaterial color="green" />
-            </mesh>
-          </group>
-          {/* Hijo 3 */}
-          <mesh position={[0, 1.5, 2]}>
-            <coneGeometry args={[0.5, 1, 32]} />
-            <meshStandardMaterial color="blue" />
-          </mesh>
-        </group>
-      )
-    }
-    
-    function App() {
-      return (
-        <>
-          <h1>3D NIKO</h1>
-          <Leva collapsed />
-          <div className="canvas-container">
-            <Canvas>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 10]} />
-              <AnimatedGroup />
-              <OrbitControls />
-            </Canvas>
-          </div>
-        </>
-      )
-    }
-    
-    export default App
+    cap.release()
+    cv2.destroyAllWindows()
+
 
 ### Comentarios personales sobre el aprendizaje y dificultades encontradas.
 
-Muy didáctica la manera en que de poco en poco con el taller anterior vamos aprendiendo nociones basicas de esta libreria
+Muy didáctica la manera en que de poco en poco con el taller anterior vamos aprendiendo nociones basicas de esta libreria y del modelo Yolo
 
-## Unity
-
-Este script permite al usuario modificar la posición en X, la rotación en Y, y la escala en Z de un objeto 3D llamado "Father" usando sliders en una interfaz UI. Cada vez que se modifica un slider, los nuevos valores del objeto se muestran en la consola de Unity usando Debug.Log.
-
-### 📸 Capturas o GIFs
-![2025-05-01 21-54-23](https://github.com/user-attachments/assets/c27bbdb6-d49c-4d1d-a578-3704c3555f48)
-
-### 🎯 Codigo Relevante
-
-    using UnityEngine;
-    using UnityEngine.UI;
-
-    public class FatherTransformControl : MonoBehaviour
-    {
-    public Transform father;
-
-    public Slider sliderPosX;
-    public Slider sliderRotY;
-    public Slider sliderScaleZ;
-
-    void Start()
-    {
-        // Inicializa sliders
-        sliderPosX.value = father.localPosition.x;
-        sliderRotY.value = father.localEulerAngles.y;
-        sliderScaleZ.value = father.localScale.z;
-
-        // Listeners
-        sliderPosX.onValueChanged.AddListener((v) => UpdatePosition());
-        sliderRotY.onValueChanged.AddListener((v) => UpdateRotation());
-        sliderScaleZ.onValueChanged.AddListener((v) => UpdateScale());
-
-        // Mostrar valores iniciales
-        LogTransform("Inicial");
-    }
-
-    void UpdatePosition()
-    {
-        Vector3 pos = father.localPosition;
-        pos.x = sliderPosX.value;
-        father.localPosition = pos;
-        LogTransform("Posición actualizada");
-    }
-
-    void UpdateRotation()
-    {
-        Vector3 rot = father.localEulerAngles;
-        rot.y = sliderRotY.value;
-        father.localEulerAngles = rot;
-        LogTransform("Rotación actualizada");
-    }
-
-    void UpdateScale()
-    {
-        Vector3 scale = father.localScale;
-        scale.z = sliderScaleZ.value;
-        father.localScale = scale;
-        LogTransform("Escala actualizada");
-    }
-
-    void LogTransform(string evento)
-    {
-        Debug.Log($"[{evento}] Pos: {father.localPosition}, Rot: {father.localEulerAngles}, Scale: {father.localScale}");
-    }
-    }
-
-### Comentarios personales sobre el aprendizaje y dificultades encontradas.
-
-Es una buena introduccion a sistemas mas complejos de jerarquía en Unity
