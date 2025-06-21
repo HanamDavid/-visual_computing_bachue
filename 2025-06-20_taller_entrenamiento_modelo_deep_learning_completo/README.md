@@ -52,7 +52,8 @@ model_ft.fc = nn.Linear(model_ft.fc.in_features, 10)
 ```
 ## 📊 Resultados Visuales
 
-![modelo_SimpleNN](resultados/SimpleNN.gif)
+![modelo_SimpleNN](resultados/modelo_SimpleNN.gif)
+
 ![ResNet18](resultados/ResNet18.gif)
 
 ## 💬 Reflexión Final
