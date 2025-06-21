@@ -1,162 +1,144 @@
-# Taller de Jerarquías y Transformaciones
+#  Taller - Creando un Monitor de Actividad Visual en 3D
+En este taller se desarrolló un sistema interactivo que conecta Python con Three.js mediante WebSockets. Se utilizó una webcam para detectar la posición del dedo índice en tiempo real usando MediaPipe, y esa información se transmitió a una escena 3D en el navegador. En Three.js, una esfera se movía dinámicamente según las coordenadas recibidas, demostrando cómo integrar visión por computadora y visualización web en tiempo real.
+
+### 📸 Capturas o GIFs
+![2025-06-20 23-41-30](https://github.com/user-attachments/assets/1c9556fa-06b8-425e-b9b2-1b355fe0f9ab)
+
+## Python
+### 🎯 Codigo Relevante
+    
+    # Cargar modelo YOLO
+    model = YOLO("yolov8n.pt")  # Asegúrate de tener este archivo
+    
+    # Inicializar cámara
+    cap = cv2.VideoCapture(0)
+    
+    # Lista de clientes conectados
+    clients = set()
+    
+    async def detectar_y_enviar():
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                continue
+    
+            # Detectar con YOLO
+            results = model(frame, verbose=False)[0]
+            persons = [b for b in results.boxes if int(b.cls) == 0]
+            count = len(persons)
+    
+            biggest = None
+            if persons:
+                biggest = max(persons, key=lambda b: b.xywh[0][2] * b.xywh[0][3])
+                x, y, w, h = map(float, biggest.xywh[0])
+                bbox = {"x": x, "y": y, "w": w, "h": h}
+            else:
+                bbox = None
+    
+            # JSON a enviar
+            data = {
+                "personas": count,
+                "bbox": bbox
+            }
+    
+            msg = json.dumps(data)
+            print("Enviando JSON:", msg)  # 👈 Mostrar en consola
+    
+            # Enviar a todos los clientes conectados
+            if clients:
+                await asyncio.gather(*[client.send(msg) for client in clients])
+    
+            # Mostrar ventana local (opcional)
+            cv2.imshow("YOLO Detection", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+    
+        cap.release()
+        cv2.destroyAllWindows()
+
+
+### Comentarios personales sobre el aprendizaje y dificultades encontradas.
+Se encontraron dificultades para hacer la conexion entre las dos partes para el envio de datos 
 
 ## Three.Js
-
-A través de los controles Leva se pudo controlar la velocidad de rotacion, posicion en X y Z. De esta manera atribuyendole estas caracteristicas al padre pudimos visualizar el comportamiento de los hijos.
-
-### 📸 Capturas o GIFs
-![2025-05-01 19-00-36](https://github.com/user-attachments/assets/553c4399-4f07-47b8-8275-9cca3156a85e)
-
 ### 🎯 Codigo Relevante
 
-    import './App.css'
-    import { Canvas, useFrame } from '@react-three/fiber'
-    import { OrbitControls } from '@react-three/drei'
-    import { useRef } from 'react'
-    import { Leva, useControls } from 'leva'
+      <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
     
-    function AnimatedGroup() {
-      const groupRef = useRef()
-      const childGroupRef = useRef()
+        // Crear la escena y cámara
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
     
-      // Controles de Leva
-      const { rotationSpeed, positionX, positionZ } = useControls({
-        rotationSpeed: { value: 0.03, min: 0, max: 0.1, step: 0.01 },
-        positionX: { value: 0, min: -5, max: 5, step: 0.1 },
-        positionZ: { value: 0, min: -5, max: 5, step: 0.1 },
-      })
+        // Renderizador
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
     
-      useFrame(({ clock }) => {
-        const t = clock.getElapsedTime()
-        // Movimiento circular del grupo principal
-        groupRef.current.position.x = positionX + Math.sin(t) * 2
-        groupRef.current.position.z = positionZ + Math.cos(t) * 2
-        groupRef.current.rotation.y += rotationSpeed
+        // Objeto representando a la persona más grande
+        const geometry = new THREE.BoxGeometry(1, 1, 0.1);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const box = new THREE.Mesh(geometry, material);
+        scene.add(box);
     
-        // Rotación adicional para el grupo hijo
-        if (childGroupRef.current) {
-          childGroupRef.current.rotation.x += 0.02
-          childGroupRef.current.rotation.z += 0.02
+        // Texto en pantalla para conteo
+        const countDiv = document.createElement("div");
+        countDiv.style.position = "absolute";
+        countDiv.style.top = "10px";
+        countDiv.style.left = "10px";
+        countDiv.style.color = "white";
+        countDiv.style.fontSize = "20px";
+        countDiv.style.fontFamily = "monospace";
+        countDiv.textContent = "Esperando datos...";
+        document.body.appendChild(countDiv);
+    
+        // Animación de la escena
+        function animate() {
+          requestAnimationFrame(animate);
+          renderer.render(scene, camera);
         }
-      })
+        animate();
     
-      return (
-        <group ref={groupRef}>
-          {/* Hijo 1 */}
-          <mesh position={[-1.5, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshNormalMaterial />
-          </mesh>
-          {/* Hijo 2 */}
-          <group ref={childGroupRef} position={[1.5, 0, 0]}>
-            <mesh>
-              <sphereGeometry args={[0.5, 20, 20]} />
-              <meshStandardMaterial color="orange" />
-            </mesh>
-            {/* Hijo de la esfera */}
-            <mesh position={[0, 1, 0]}>
-              <torusGeometry args={[0.3, 0.1, 16, 100]} />
-              <meshStandardMaterial color="green" />
-            </mesh>
-          </group>
-          {/* Hijo 3 */}
-          <mesh position={[0, 1.5, 2]}>
-            <coneGeometry args={[0.5, 1, 32]} />
-            <meshStandardMaterial color="blue" />
-          </mesh>
-        </group>
-      )
-    }
+        // WebSocket
+        const ws = new WebSocket("ws://127.0.0.1:8765");
     
-    function App() {
-      return (
-        <>
-          <h1>3D NIKO</h1>
-          <Leva collapsed />
-          <div className="canvas-container">
-            <Canvas>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 10]} />
-              <AnimatedGroup />
-              <OrbitControls />
-            </Canvas>
-          </div>
-        </>
-      )
-    }
     
-    export default App
+        ws.onopen = () => {
+          console.log("✅ WebSocket conectado");
+        };
+    
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          console.log("📦 Datos recibidos:", data);
+    
+          countDiv.textContent = `👥 Personas detectadas: ${data.personas}`;
+    
+          if (data.bbox) {
+            // Normalizar posición (asumiendo cámara 640x480)
+            const x = (data.bbox.x - 320) / 320;
+            const y = -(data.bbox.y - 240) / 240;
+            box.position.set(x * 2, y * 2, 0);
+    
+            // Escalar el cubo según el tamaño del bounding box
+            box.scale.set(data.bbox.w / 100, data.bbox.h / 100, 1);
+            box.visible = true;
+          } else {
+            box.visible = false;
+          }
+        };
+    
+        ws.onerror = (err) => {
+          console.error("❌ Error en WebSocket:", err);
+        };
+    
+        ws.onclose = () => {
+          console.warn("⚠️ WebSocket cerrado");
+          countDiv.textContent = "🔌 Conexión perdida";
+        };
+    
+
 
 ### Comentarios personales sobre el aprendizaje y dificultades encontradas.
+Se encontraron dificultades para hacer la conexion entre las dos partes para el envio de datos
 
-Muy didáctica la manera en que de poco en poco con el taller anterior vamos aprendiendo nociones basicas de esta libreria
-
-## Unity
-
-Este script permite al usuario modificar la posición en X, la rotación en Y, y la escala en Z de un objeto 3D llamado "Father" usando sliders en una interfaz UI. Cada vez que se modifica un slider, los nuevos valores del objeto se muestran en la consola de Unity usando Debug.Log.
-
-### 📸 Capturas o GIFs
-![2025-05-01 21-54-23](https://github.com/user-attachments/assets/c27bbdb6-d49c-4d1d-a578-3704c3555f48)
-
-### 🎯 Codigo Relevante
-
-    using UnityEngine;
-    using UnityEngine.UI;
-
-    public class FatherTransformControl : MonoBehaviour
-    {
-    public Transform father;
-
-    public Slider sliderPosX;
-    public Slider sliderRotY;
-    public Slider sliderScaleZ;
-
-    void Start()
-    {
-        // Inicializa sliders
-        sliderPosX.value = father.localPosition.x;
-        sliderRotY.value = father.localEulerAngles.y;
-        sliderScaleZ.value = father.localScale.z;
-
-        // Listeners
-        sliderPosX.onValueChanged.AddListener((v) => UpdatePosition());
-        sliderRotY.onValueChanged.AddListener((v) => UpdateRotation());
-        sliderScaleZ.onValueChanged.AddListener((v) => UpdateScale());
-
-        // Mostrar valores iniciales
-        LogTransform("Inicial");
-    }
-
-    void UpdatePosition()
-    {
-        Vector3 pos = father.localPosition;
-        pos.x = sliderPosX.value;
-        father.localPosition = pos;
-        LogTransform("Posición actualizada");
-    }
-
-    void UpdateRotation()
-    {
-        Vector3 rot = father.localEulerAngles;
-        rot.y = sliderRotY.value;
-        father.localEulerAngles = rot;
-        LogTransform("Rotación actualizada");
-    }
-
-    void UpdateScale()
-    {
-        Vector3 scale = father.localScale;
-        scale.z = sliderScaleZ.value;
-        father.localScale = scale;
-        LogTransform("Escala actualizada");
-    }
-
-    void LogTransform(string evento)
-    {
-        Debug.Log($"[{evento}] Pos: {father.localPosition}, Rot: {father.localEulerAngles}, Scale: {father.localScale}");
-    }
-    }
-
-### Comentarios personales sobre el aprendizaje y dificultades encontradas.
-
-Es una buena introduccion a sistemas mas complejos de jerarquía en Unity
