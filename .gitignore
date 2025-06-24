@@ -79,3 +79,10 @@ UnityAcceleratorClient.yaml
 # Example for WebGL build
 # /docs
 ############################################################################################################
+env/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+

@@ -1,0 +1,5 @@
+timestamp,evento,clase,confianza
+2025-06-23 22:21:47,Persona detectada,person,0.87
+2025-06-23 22:21:47,Captura guardada,person,0.87
+2025-06-23 22:22:11,Persona detectada,person,0.76
+2025-06-23 22:22:11,Captura guardada,person,0.76
