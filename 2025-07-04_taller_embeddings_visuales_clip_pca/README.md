@@ -74,7 +74,7 @@ for i, path in enumerate(image_paths):
 ```
 ## 📊 Resultados Visuales
 📌 Se generó la visualización en 2D que muestra claramente un agrupamiento de gatos en una zona del espacio latente y carros en otra, demostrando que CLIP logra separar semánticamente los contenidos visuales.
-![Visualización PCA](graficos/salida.JPG)
+![Visualización PCA](graficos/salida2.JPG)
 
 ✅ También se generó el siguiente GIF mostrando la transición desde embeddings crudos hasta la proyección visual:
 ![Visualización PCA](graficos/visualizacion_clip_pca.gif)
