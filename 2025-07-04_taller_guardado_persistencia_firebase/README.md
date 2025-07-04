@@ -1,6 +1,8 @@
 # 🧪 Persistencia con Firebase en Three.js
 Solo se pudo hacer en Three.js ya que unity era muy pesado y no lo podia abrir.
+
 📅 Fecha  
+
 2025-07-04 – Fecha de realización
 
 ---
