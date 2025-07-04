@@ -1,162 +1,51 @@
-# Taller de Jerarquías y Transformaciones
+# Taller - Visual y Verbal: Clasificación de Imágenes con CLIP
 
-## Three.Js
-
-A través de los controles Leva se pudo controlar la velocidad de rotacion, posicion en X y Z. De esta manera atribuyendole estas caracteristicas al padre pudimos visualizar el comportamiento de los hijos.
-
-### 📸 Capturas o GIFs
-![2025-05-01 19-00-36](https://github.com/user-attachments/assets/553c4399-4f07-47b8-8275-9cca3156a85e)
-
-### 🎯 Codigo Relevante
-
-    import './App.css'
-    import { Canvas, useFrame } from '@react-three/fiber'
-    import { OrbitControls } from '@react-three/drei'
-    import { useRef } from 'react'
-    import { Leva, useControls } from 'leva'
-    
-    function AnimatedGroup() {
-      const groupRef = useRef()
-      const childGroupRef = useRef()
-    
-      // Controles de Leva
-      const { rotationSpeed, positionX, positionZ } = useControls({
-        rotationSpeed: { value: 0.03, min: 0, max: 0.1, step: 0.01 },
-        positionX: { value: 0, min: -5, max: 5, step: 0.1 },
-        positionZ: { value: 0, min: -5, max: 5, step: 0.1 },
-      })
-    
-      useFrame(({ clock }) => {
-        const t = clock.getElapsedTime()
-        // Movimiento circular del grupo principal
-        groupRef.current.position.x = positionX + Math.sin(t) * 2
-        groupRef.current.position.z = positionZ + Math.cos(t) * 2
-        groupRef.current.rotation.y += rotationSpeed
-    
-        // Rotación adicional para el grupo hijo
-        if (childGroupRef.current) {
-          childGroupRef.current.rotation.x += 0.02
-          childGroupRef.current.rotation.z += 0.02
-        }
-      })
-    
-      return (
-        <group ref={groupRef}>
-          {/* Hijo 1 */}
-          <mesh position={[-1.5, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshNormalMaterial />
-          </mesh>
-          {/* Hijo 2 */}
-          <group ref={childGroupRef} position={[1.5, 0, 0]}>
-            <mesh>
-              <sphereGeometry args={[0.5, 20, 20]} />
-              <meshStandardMaterial color="orange" />
-            </mesh>
-            {/* Hijo de la esfera */}
-            <mesh position={[0, 1, 0]}>
-              <torusGeometry args={[0.3, 0.1, 16, 100]} />
-              <meshStandardMaterial color="green" />
-            </mesh>
-          </group>
-          {/* Hijo 3 */}
-          <mesh position={[0, 1.5, 2]}>
-            <coneGeometry args={[0.5, 1, 32]} />
-            <meshStandardMaterial color="blue" />
-          </mesh>
-        </group>
-      )
-    }
-    
-    function App() {
-      return (
-        <>
-          <h1>3D NIKO</h1>
-          <Leva collapsed />
-          <div className="canvas-container">
-            <Canvas>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 10]} />
-              <AnimatedGroup />
-              <OrbitControls />
-            </Canvas>
-          </div>
-        </>
-      )
-    }
-    
-    export default App
-
-### Comentarios personales sobre el aprendizaje y dificultades encontradas.
-
-Muy didáctica la manera en que de poco en poco con el taller anterior vamos aprendiendo nociones basicas de esta libreria
-
-## Unity
-
-Este script permite al usuario modificar la posición en X, la rotación en Y, y la escala en Z de un objeto 3D llamado "Father" usando sliders en una interfaz UI. Cada vez que se modifica un slider, los nuevos valores del objeto se muestran en la consola de Unity usando Debug.Log.
+## Python
+En este taller se trabajó con el modelo CLIP de OpenAI para realizar clasificación de imágenes utilizando descripciones en lenguaje natural. Se instalaron las librerías necesarias, se cargó el modelo CLIP y se preparó una imagen junto con un conjunto de etiquetas de texto. Luego, se procesó la imagen y las etiquetas para obtener sus representaciones (embeddings), se calcularon las similitudes y se mostraron las probabilidades asociadas a cada etiqueta, determinando cuál descripción se ajustaba mejor al contenido visual de la imagen. Finalmente, se visualizaron los resultados y se propuso experimentar con descripciones más detalladas para mejorar la precisión del modelo.
 
 ### 📸 Capturas o GIFs
-![2025-05-01 21-54-23](https://github.com/user-attachments/assets/c27bbdb6-d49c-4d1d-a578-3704c3555f48)
+![Figure_1](https://github.com/user-attachments/assets/59d28cc6-9965-4ae7-911c-1f466820b0e4)
+![Figure_2](https://github.com/user-attachments/assets/31208480-5553-41d7-bd55-899a3873efe8)
+![Figure_3](https://github.com/user-attachments/assets/e4b24d41-2954-460a-90a6-09e0072052e8)
 
 ### 🎯 Codigo Relevante
-
-    using UnityEngine;
-    using UnityEngine.UI;
-
-    public class FatherTransformControl : MonoBehaviour
-    {
-    public Transform father;
-
-    public Slider sliderPosX;
-    public Slider sliderRotY;
-    public Slider sliderScaleZ;
-
-    void Start()
-    {
-        // Inicializa sliders
-        sliderPosX.value = father.localPosition.x;
-        sliderRotY.value = father.localEulerAngles.y;
-        sliderScaleZ.value = father.localScale.z;
-
-        // Listeners
-        sliderPosX.onValueChanged.AddListener((v) => UpdatePosition());
-        sliderRotY.onValueChanged.AddListener((v) => UpdateRotation());
-        sliderScaleZ.onValueChanged.AddListener((v) => UpdateScale());
-
-        // Mostrar valores iniciales
-        LogTransform("Inicial");
-    }
-
-    void UpdatePosition()
-    {
-        Vector3 pos = father.localPosition;
-        pos.x = sliderPosX.value;
-        father.localPosition = pos;
-        LogTransform("Posición actualizada");
-    }
-
-    void UpdateRotation()
-    {
-        Vector3 rot = father.localEulerAngles;
-        rot.y = sliderRotY.value;
-        father.localEulerAngles = rot;
-        LogTransform("Rotación actualizada");
-    }
-
-    void UpdateScale()
-    {
-        Vector3 scale = father.localScale;
-        scale.z = sliderScaleZ.value;
-        father.localScale = scale;
-        LogTransform("Escala actualizada");
-    }
-
-    void LogTransform(string evento)
-    {
-        Debug.Log($"[{evento}] Pos: {father.localPosition}, Rot: {father.localEulerAngles}, Scale: {father.localScale}");
-    }
-    }
+    import clip
+    import torch
+    from PIL import Image
+    
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model, preprocess = clip.load("ViT-B/32", device=device)
+    
+    # Cargar y preprocesar la imagen relevante
+    image_path = "C:\\Users\\nicoa\\Downloads\\gato_perro.jpg"  
+    image = preprocess(Image.open(image_path)).unsqueeze(0).to(device)
+    
+    text_labels = ["cat", "dog"]
+    text = clip.tokenize(text_labels).to(device)
+    
+    with torch.no_grad():
+        image_features = model.encode_image(image)
+        text_features = model.encode_text(text)
+        logits_per_image, logits_per_text = model(image, text)
+        probs = logits_per_image.softmax(dim=-1).cpu().numpy()
+    
+    
+    import matplotlib.pyplot as plt
+    
+    # Mostrar imagen
+    plt.imshow(Image.open(image_path))
+    plt.axis('off')
+    plt.title("Imagen cargada")
+    plt.show()
+    
+    # Mostrar resultados
+    for label, prob in zip(text_labels, probs[0]):
+        print(f"{label}: {prob:.4f}")
+    
+    # Mostrar predicción más probable
+    pred = text_labels[probs[0].argmax()]
+    print(f"\nPredicción más probable: {pred}")
 
 ### Comentarios personales sobre el aprendizaje y dificultades encontradas.
+Se encontraron dificultades encontrando imagenes con la suficiente resolucion para hacer la identificacion de los animales señalados, se intento con imagenes propias con baja resolucion y presentaba fallas
 
-Es una buena introduccion a sistemas mas complejos de jerarquía en Unity
