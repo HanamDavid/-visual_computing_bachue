@@ -1,162 +1,54 @@
-# Taller de Jerarquías y Transformaciones
+# Taller - Evaluando la Creatividad Artificial: Métricas y Reflexión
 
-## Three.Js
+## Python
 
-A través de los controles Leva se pudo controlar la velocidad de rotacion, posicion en X y Z. De esta manera atribuyendole estas caracteristicas al padre pudimos visualizar el comportamiento de los hijos.
-
-### 📸 Capturas o GIFs
-![2025-05-01 19-00-36](https://github.com/user-attachments/assets/553c4399-4f07-47b8-8275-9cca3156a85e)
-
-### 🎯 Codigo Relevante
-
-    import './App.css'
-    import { Canvas, useFrame } from '@react-three/fiber'
-    import { OrbitControls } from '@react-three/drei'
-    import { useRef } from 'react'
-    import { Leva, useControls } from 'leva'
-    
-    function AnimatedGroup() {
-      const groupRef = useRef()
-      const childGroupRef = useRef()
-    
-      // Controles de Leva
-      const { rotationSpeed, positionX, positionZ } = useControls({
-        rotationSpeed: { value: 0.03, min: 0, max: 0.1, step: 0.01 },
-        positionX: { value: 0, min: -5, max: 5, step: 0.1 },
-        positionZ: { value: 0, min: -5, max: 5, step: 0.1 },
-      })
-    
-      useFrame(({ clock }) => {
-        const t = clock.getElapsedTime()
-        // Movimiento circular del grupo principal
-        groupRef.current.position.x = positionX + Math.sin(t) * 2
-        groupRef.current.position.z = positionZ + Math.cos(t) * 2
-        groupRef.current.rotation.y += rotationSpeed
-    
-        // Rotación adicional para el grupo hijo
-        if (childGroupRef.current) {
-          childGroupRef.current.rotation.x += 0.02
-          childGroupRef.current.rotation.z += 0.02
-        }
-      })
-    
-      return (
-        <group ref={groupRef}>
-          {/* Hijo 1 */}
-          <mesh position={[-1.5, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshNormalMaterial />
-          </mesh>
-          {/* Hijo 2 */}
-          <group ref={childGroupRef} position={[1.5, 0, 0]}>
-            <mesh>
-              <sphereGeometry args={[0.5, 20, 20]} />
-              <meshStandardMaterial color="orange" />
-            </mesh>
-            {/* Hijo de la esfera */}
-            <mesh position={[0, 1, 0]}>
-              <torusGeometry args={[0.3, 0.1, 16, 100]} />
-              <meshStandardMaterial color="green" />
-            </mesh>
-          </group>
-          {/* Hijo 3 */}
-          <mesh position={[0, 1.5, 2]}>
-            <coneGeometry args={[0.5, 1, 32]} />
-            <meshStandardMaterial color="blue" />
-          </mesh>
-        </group>
-      )
-    }
-    
-    function App() {
-      return (
-        <>
-          <h1>3D NIKO</h1>
-          <Leva collapsed />
-          <div className="canvas-container">
-            <Canvas>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 10]} />
-              <AnimatedGroup />
-              <OrbitControls />
-            </Canvas>
-          </div>
-        </>
-      )
-    }
-    
-    export default App
-
-### Comentarios personales sobre el aprendizaje y dificultades encontradas.
-
-Muy didáctica la manera en que de poco en poco con el taller anterior vamos aprendiendo nociones basicas de esta libreria
-
-## Unity
-
-Este script permite al usuario modificar la posición en X, la rotación en Y, y la escala en Z de un objeto 3D llamado "Father" usando sliders en una interfaz UI. Cada vez que se modifica un slider, los nuevos valores del objeto se muestran en la consola de Unity usando Debug.Log.
+En este taller se exploró la relación entre texto e imagen en creaciones generadas por inteligencia artificial. Se cargaron imágenes previamente generadas con prompts usando modelos como DALL·E o Stable Diffusion, y se aplicaron métricas automáticas como CLIPScore, que mide qué tan bien la imagen representa el texto original. Opcionalmente, se analizó la simetría visual mediante comparaciones de las mitades izquierda y derecha de la imagen. También se compararon distintas imágenes generadas con el mismo prompt para evaluar coherencia, creatividad y posibles elementos absurdos. Finalmente, se reflexionó sobre el papel humano en la generación de estas imágenes y los límites de usar métricas para evaluar arte y creatividad.
 
 ### 📸 Capturas o GIFs
-![2025-05-01 21-54-23](https://github.com/user-attachments/assets/c27bbdb6-d49c-4d1d-a578-3704c3555f48)
+![img_1](https://github.com/user-attachments/assets/819088f8-b960-4bbf-9a5a-a13d95c8aacb)
+![img_2](https://github.com/user-attachments/assets/148b6004-a54e-4de5-8ccf-75c30a434a6b)
+![img_3](https://github.com/user-attachments/assets/9c979ae6-5eaf-4a32-ac9f-12df1ae679a8)
+
 
 ### 🎯 Codigo Relevante
-
-    using UnityEngine;
-    using UnityEngine.UI;
-
-    public class FatherTransformControl : MonoBehaviour
-    {
-    public Transform father;
-
-    public Slider sliderPosX;
-    public Slider sliderRotY;
-    public Slider sliderScaleZ;
-
-    void Start()
-    {
-        // Inicializa sliders
-        sliderPosX.value = father.localPosition.x;
-        sliderRotY.value = father.localEulerAngles.y;
-        sliderScaleZ.value = father.localScale.z;
-
-        // Listeners
-        sliderPosX.onValueChanged.AddListener((v) => UpdatePosition());
-        sliderRotY.onValueChanged.AddListener((v) => UpdateRotation());
-        sliderScaleZ.onValueChanged.AddListener((v) => UpdateScale());
-
-        // Mostrar valores iniciales
-        LogTransform("Inicial");
-    }
-
-    void UpdatePosition()
-    {
-        Vector3 pos = father.localPosition;
-        pos.x = sliderPosX.value;
-        father.localPosition = pos;
-        LogTransform("Posición actualizada");
-    }
-
-    void UpdateRotation()
-    {
-        Vector3 rot = father.localEulerAngles;
-        rot.y = sliderRotY.value;
-        father.localEulerAngles = rot;
-        LogTransform("Rotación actualizada");
-    }
-
-    void UpdateScale()
-    {
-        Vector3 scale = father.localScale;
-        scale.z = sliderScaleZ.value;
-        father.localScale = scale;
-        LogTransform("Escala actualizada");
-    }
-
-    void LogTransform(string evento)
-    {
-        Debug.Log($"[{evento}] Pos: {father.localPosition}, Rot: {father.localEulerAngles}, Scale: {father.localScale}");
-    }
-    }
-
+    import clip
+    import torch
+    from PIL import Image
+    import os
+    
+    # Cargar modelo CLIP
+    model, preprocess = clip.load("ViT-B/32")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model.to(device)
+    
+    # Ruta a la carpeta de Descargas (ajustada para tu caso)
+    base_path = os.path.expanduser("C:/Users/nicoa/Downloads/")
+    
+    # Lista de imágenes y sus prompts correspondientes
+    data = [
+        ("img_1.png", "a surreal dreamscape with floating cities"),
+        ("img_2.png", "a futuristic city in the desert"),
+        ("img_3.png", "a cat reading a newspaper in a café"),
+    ]
+    
+    # Procesar cada imagen
+    for filename, prompt in data:
+        img_path = os.path.join(base_path, filename)
+    
+        if not os.path.exists(img_path):
+            print(f"[ERROR] Imagen no encontrada: {img_path}")
+            continue
+    
+        image = preprocess(Image.open(img_path)).unsqueeze(0).to(device)
+        text = clip.tokenize([prompt]).to(device)
+    
+        with torch.no_grad():
+            image_features = model.encode_image(image)
+            text_features = model.encode_text(text)
+            similarity = torch.cosine_similarity(image_features, text_features).item()
+    
+        print(f"CLIPScore para '{filename}' ({prompt}): {similarity:.4f}")
+    
 ### Comentarios personales sobre el aprendizaje y dificultades encontradas.
 
-Es una buena introduccion a sistemas mas complejos de jerarquía en Unity
+Se deberian hacer mas reflexiones en cuanto a la creatividad y el trabajo que uno hace en este uso de herramientas de IA
