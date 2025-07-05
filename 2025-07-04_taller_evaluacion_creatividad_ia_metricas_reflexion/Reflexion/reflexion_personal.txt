@@ -1,0 +1,23 @@
+3) Comparar varias generaciones para un mismo prompt:
+
+¿Cuál se ve más coherente?
+El mas coherente es sin duda alguna el gato, se entiende porque es el mas sencillo por decirlo de alguna manera y seguido de la ciudad en el desierto
+
+¿Cuál es más creativa?
+Lejos es el de las ciudades flotando, pero es que el prompt era tambien muy creativo
+
+¿Hay elementos absurdos o sorprendentes?
+Hay elementos parecidos a hongos, lo absurdo es que si uno se fija no parecen ciudades flotantes en sí
+
+
+4) Reflexión colectiva o individual:
+
+¿Qué significa que algo sea “creativo”?
+Creativo es hacer algo original e innovador a partir de conceptos que ya existen pero de una manera que no se ha percibido antes
+Para mi es algo muy dificil a que sea original ya que toda idea es la produccion de otras, como decia picasso "Los buenos artistas copian y los grandes roban"
+
+¿Qué parte de la imagen fue decidida por el humano?
+En este caso la parte de la estructura, aunque la IA genero la imagen yo le di el prompt para que generara lo que queria
+
+¿Podemos medir arte o creatividad con métricas?
+No me parece, esos conceptos son muy subjetivos que se encuentran en grandes debates por personas que saben de arte. Al final no es algo medible.
