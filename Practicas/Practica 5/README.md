@@ -98,7 +98,13 @@ Este informe resume la exploración práctica realizada durante el taller de XR,
 ---
 
 ## 5. Evidencias
-![Evidencias](evidencias/evidencia1.jpg)
+![Evidencias](evidencias/evidencia_0.JPG)
+![Evidencias](evidencias/evidencia_1.JPG)
+![Evidencias](evidencias/evidencia_2.JPG)
+![Evidencias](evidencias/evidencia_3.JPG)
+![Evidencias](evidencias/evidencia_4.JPG)
+![Evidencias](evidencias/evidencia_6.JPG)
+![Evidencias](evidencias/evidencia_5.JPG)
 ---
 ## 6. Conclusión
 
