@@ -100,12 +100,12 @@ El modelo YOLOv8 proporciona detecciones rápidas y precisas en imágenes modern
 Cuando se utilizaron imágenes de arte antiguo como **íconos bizantinos** o **arte rupestre**, el modelo presentó dificultades para identificar objetos relevantes.
 
 Por ejemplo veamos el siguiente icono el cual detecto como un reloj
-![Icono input](/imagenes/icon.png)
-![Icono input](/imagenes/icon_results.png)
+![Icono input](./imagenes/icon.png)
+![Icono input](./imagenes/icon_results.png)
 O la siguiente imagen de toros donde detecto una zebra
-![Toros](/imagenes/toros.png)
+![Toros](./imagenes/toros.png)
 Con imagenes contemporaneas si funcionan bien ambos metodos
-![Imagen de libro](/imagenes/farsi.png)
+![Imagen de libro](./imagenes/farsi.png)
 
 **Interpretación:**
 Esto sugiere que el modelo está entrenado principalmente con imágenes contemporáneas (fotografías de objetos en contextos modernos), y por tanto:
