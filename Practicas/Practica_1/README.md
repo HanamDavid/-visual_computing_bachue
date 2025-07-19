@@ -38,7 +38,7 @@ Descripción:
 
 Actividad 3 - Simulador: Ray Optics Simulator
 
-    Se cambió el medio exterior a vidrio y se lanzó un rayo en diagonal hacia una lente. Se comparó el comportamiento del rayo en aire (primera captura) vs. en vidrio (segunda captura).
+    Se cambió el medio exterior a vidrio y se lanzó un rayo en diagonal hacia una lente. Se comparó el comportamiento del rayo en aire vs con diferentes lentes para tratar de ver mas como afectan los vidrios la reflexion
 
 Captura:
 
